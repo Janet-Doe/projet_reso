@@ -26,6 +26,9 @@ public class Main {
 
     }
 
+    private static void ask(){}
+    private static void answer(){}
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("I am a client !");
