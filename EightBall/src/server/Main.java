@@ -21,7 +21,7 @@ public class Main {
                 String incomingUsername = Arrays.toString(firstPacket.getData());
 
                 if (DNS.containsKey(incomingUsername)) {
-                    System.out.println("TODO Username already used");
+                    System.out.println("TODO Username already used : add like UserName_2 to DNS & send the new name to the client");
                     continue;
                 }
 

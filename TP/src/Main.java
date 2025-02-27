@@ -5,25 +5,23 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Entrer l'indice du début de la plage de port à tester");
+        System.out.println("Enter the first port to test: ");
         int indiceDebut = scanner.nextInt();
-        System.out.println("Entrer l'indice de fin de la plage");
+        System.out.println("Enter the last port to test: ");
         int indiceFin = scanner.nextInt();
-
         testPlagePort(indiceDebut, indiceFin);
     }
 
     public static void testPlagePort(int indiceDebut, int indiceFin) {
         for (int portNumber = indiceDebut; portNumber <= indiceFin; portNumber++) {
-            StringBuilder sb = new StringBuilder("Test du port "+ portNumber +" : ");
+            StringBuilder sb = new StringBuilder("Test of port "+ portNumber +" : ");
             try {
                 DatagramSocket socketServeur = new DatagramSocket(new InetSocketAddress("localhost", portNumber));
-                sb.append("disponible");
+                sb.append("available");
                 socketServeur.close();
             } catch (SocketException se) {
-                sb.append("indisponible");
+                sb.append("unavailable");
             }
             System.out.println(sb);
         }
