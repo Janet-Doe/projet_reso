@@ -6,7 +6,6 @@ import java.util.Scanner;
 public class Main {
     private static DatagramSocket clientSocket;
     private static DatagramSocket serverSocket;
-    private static byte[] emissionBuffer;
 
     private static void chooseServer(){
         Scanner scanner = new Scanner(System.in);
@@ -28,22 +27,23 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        System.out.println("I am a client !");
-        try {
-            clientSocket = new DatagramSocket(null);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        chooseServer();
         Scanner scanner = new Scanner(System.in);
-        // Channel creation :
+        System.out.println("I am a client !");
+        // Set up :
+        try {
+                    clientSocket = new DatagramSocket(null);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+                chooseServer();
         byte[] receptionBuffer = new byte[1024];
-        // Emission :
+        byte[] emissionBuffer = null;
         System.out.println("Pick your username for this session (exit to quit):");
         String emissionMessage = scanner.nextLine();
-
+        // Communication :
         while (!emissionMessage.equals("exit")) {
             try {
+                // Emission :
                 emissionBuffer = emissionMessage.getBytes();
                 DatagramPacket emissionPacket = new DatagramPacket(emissionBuffer, emissionBuffer.length, serverSocket.getInetAddress(), serverSocket.getPort());
                 clientSocket.send(emissionPacket);
@@ -52,11 +52,13 @@ public class Main {
                 clientSocket.receive(receptionPacket);
                 String receptionMessage = new String(receptionPacket.getData(), 0, receptionPacket.getLength());
                 System.out.println("From the server: " + receptionMessage);
+                // Reaction :
                 emissionMessage = scanner.nextLine();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
         }
+        // End of communication :
         System.out.println("Bye-bye!");
         clientSocket.close();
     }
