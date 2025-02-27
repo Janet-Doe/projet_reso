@@ -2,11 +2,9 @@ package server;
 
 import java.net.*;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Main {
-    private static final Map<String, CommunicationThread> DNS = new HashMap<>();
+
     public static void main(String[] args) {
         DatagramSocket serverSocket = null;
         try {
@@ -20,7 +18,7 @@ public class Main {
 
                 String incomingUsername = Arrays.toString(firstPacket.getData());
 
-                if (DNS.containsKey(incomingUsername)) {
+                if (InternalCommunication.containsKey(incomingUsername)) {
                     System.out.println("TODO Username already used : add like UserName_2 to DNS & send the new name to the client");
                     continue;
                 }
@@ -30,7 +28,7 @@ public class Main {
                 DatagramSocket threadSocket = new DatagramSocket(serverAddress);
                 CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort);
 
-                DNS.put(incomingUsername, newThread);
+                InternalCommunication.put(incomingUsername, newThread);
 
                 newThread.start();
             }
