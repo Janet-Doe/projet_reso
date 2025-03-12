@@ -19,6 +19,10 @@ public class InternalCommunication {
         DNS.put(id, incomingInformation);
     }
 
+    public static ClientInformation get(int id) {
+        return DNS.get(id);
+    }
+
     public static void putQuestionInWaitingList(String data) {
         questionQueue.add(data);
     }

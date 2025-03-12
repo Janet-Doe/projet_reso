@@ -11,22 +11,24 @@ import java.util.concurrent.Semaphore;
 public class CommunicationThread extends Thread {
     private final InetAddress clientAdr;
     private final int clientPort;
+    private final int clientId;
     private final DatagramSocket threadSocket;
     private final Timer timer;
     private byte[] receptionBuffer = new byte[1024];
     private byte[] emissionBuffer;
 
-    public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort) throws IOException {
+    public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort, int clientId) {
         this.clientAdr = clientAdr;
         this.clientPort = clientPort;
+        this.clientId = clientId;
         this.threadSocket = threadSocket;
-        this.timer = new Timer(this, 600);
+        this.timer = new Timer(this, 60);
     }
 
     public void run() {
         timer.start();
         System.out.println("Connection thread running");
-        while (true) {
+        while (!this.isInterrupted()) {
             try {
                 String question = "Ask your question ?";
                 this.emissionBuffer = question.getBytes();
@@ -46,10 +48,14 @@ public class CommunicationThread extends Thread {
                 sendPacket(answer);
 
             } catch (IOException e) {
-                System.out.println("Connection thread stopped");
+                System.err.println("Error thread");
                 throw new RuntimeException(e);
             }
         }
+
+        System.out.println("Connection thread stopped");
+        this.threadSocket.close();
+        InternalCommunication.get(this.clientId).setState(ConnectionState.WAITING);
     }
 
     private void sendPacket(String message) {
