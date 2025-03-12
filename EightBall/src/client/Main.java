@@ -1,4 +1,5 @@
 package client;
+import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
 
@@ -7,9 +8,11 @@ public class Main {
     private static DatagramSocket clientSocket;
     private static InetAddress serverAddress;
     private static int serverPort;
+    private static byte[] emissionBuffer;
+    private static byte[] receptionBuffer;
+    private static final Scanner scanner = new Scanner(System.in);
 
     private static void chooseServer(){
-        Scanner scanner = new Scanner(System.in);
         boolean isValid;
         do {
             try {
@@ -20,15 +23,27 @@ public class Main {
                 isValid = true;
             } catch (Exception e) {
                 isValid = false;
-                System.out.println(e.getMessage());
+                System.out.println(e);
                 System.out.println("We are not able to contact this server, please try again.");
             }
         } while (!isValid);
-
     }
 
     private static void ask(){}
     private static void answer(){}
+
+    private static void emission(String emissionMessage) throws IOException {
+        System.out.println("message : " + emissionMessage);
+        Main.emissionBuffer = emissionMessage.getBytes();
+        DatagramPacket emissionPacket = new DatagramPacket(Main.emissionBuffer, Main.emissionBuffer.length, Main.serverAddress, Main.serverPort);
+        Main.clientSocket.send(emissionPacket);
+    }
+
+    private static String reception() throws IOException {
+        DatagramPacket receptionPacket = new DatagramPacket(Main.receptionBuffer, Main.receptionBuffer.length);
+        Main.clientSocket.receive(receptionPacket);
+        return new String(receptionPacket.getData(), 0, receptionPacket.getLength());
+    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -37,29 +52,45 @@ public class Main {
         try {
                 Main.clientSocket = new DatagramSocket(null);
                 } catch (Exception e) {
-                    System.out.println(e.getMessage());
+                    System.out.println(e);
                 }
                 chooseServer();
-        byte[] receptionBuffer = new byte[1024];
-        byte[] emissionBuffer = null;
-        System.out.println("Pick your username for this session (exit to quit):");
-        String emissionMessage = scanner.nextLine();
+        Main.receptionBuffer = new byte[1024];
+        Main.emissionBuffer = null;
+        boolean validUsername = false;
+
+        // Username choice :
+        do {
+            try {
+                System.out.println("Pick your username for this session (\"abandon\" to quit):");
+                String username = scanner.nextLine();
+                if (username.equals("abandon")) {
+                    throw new Exception("User wants to exit the program.");
+                }
+                emission("Connexion:" + username);
+                String reception = reception();
+                System.out.println("From the server: " + reception);
+                if (!reception.split(" ")[0].equals("Error")) {
+                    validUsername = true;
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+                System.out.println("Exiting program.");
+                Main.clientSocket.close();
+                return;
+            }
+        } while (!validUsername);
+
         // Communication :
+        System.out.println("Send a message:");
+        String emissionMessage = scanner.nextLine();
         while (!emissionMessage.equals("exit")) {
             try {
-                // Emission :
-                emissionBuffer = emissionMessage.getBytes();
-                DatagramPacket emissionPacket = new DatagramPacket(emissionBuffer, emissionBuffer.length, Main.serverAddress, Main.serverPort);
-                Main.clientSocket.send(emissionPacket);
-                // Reception :
-                DatagramPacket receptionPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
-                Main.clientSocket.receive(receptionPacket);
-                String receptionMessage = new String(receptionPacket.getData(), 0, receptionPacket.getLength());
-                System.out.println("From the server: " + receptionMessage);
-                // Reaction :
+                emission(emissionMessage);
+                System.out.println("From the server: " + reception());
                 emissionMessage = scanner.nextLine();
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.out.println(e);
                 System.out.println("Exit.");
                 Main.clientSocket.close();
                 return;

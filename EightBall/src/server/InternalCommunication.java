@@ -3,20 +3,20 @@ package server;
 import java.util.*;
 
 public class InternalCommunication {
-    private static final Map<String, CommunicationThread> DNS = new HashMap<>();
+    private static final Map<Integer, ClientInformation> DNS = new HashMap<>();
     private static final Queue<String> questionQueue = new LinkedList<>();
     private static final Queue<String> answerQueue   = new LinkedList<>();
 
-    public static Map<String, CommunicationThread> getDNS() {
+    public static Map<Integer, ClientInformation> getDNS() {
         return DNS;
     }
 
-    public static boolean containsKey(String incomingUsername) {
-        return DNS.containsKey(incomingUsername);
+    public static boolean containsKey(int incomingId) {
+        return DNS.containsKey(incomingId);
     }
 
-    public static void put(String incomingUsername, CommunicationThread newThread) {
-        DNS.put(incomingUsername, newThread);
+    public static void put(Integer id, ClientInformation incomingInformation) {
+        DNS.put(id, incomingInformation);
     }
 
     public static void putQuestionInWaitingList(byte[] data) {

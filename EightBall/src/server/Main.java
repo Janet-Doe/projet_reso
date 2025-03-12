@@ -10,7 +10,7 @@ public class Main {
         try {
             InetSocketAddress serverAddress = new InetSocketAddress("localhost", 6666);
             serverSocket = new DatagramSocket(serverAddress);
-            System.out.println("Server adress: " + serverAddress.getAddress().getHostAddress());
+            System.out.println("Server address: " + serverAddress.getAddress().getHostAddress());
             System.out.println("Server port: " + serverAddress.getPort());
             byte[] receptionBuffer = new byte[1024];
 
@@ -19,20 +19,29 @@ public class Main {
                 serverSocket.receive(firstPacket);
 
                 String incomingUsername = new String(firstPacket.getData());
-                incomingUsername = incomingUsername.trim();
-                System.out.println("Incoming message: " + incomingUsername);
+                incomingUsername = incomingUsername.split(":")[1].trim();
+                System.out.println("Incoming username: " + incomingUsername);
 
-                if (InternalCommunication.containsKey(incomingUsername)) {
-                    System.out.println("TODO Username already used : add like UserName_2 to DNS & send the new name to the client");
+                InetAddress clientAdr = firstPacket.getAddress();
+                int clientPort        = firstPacket.getPort();
+
+                int id = incomingUsername.hashCode() + clientAdr.hashCode();
+
+                if (InternalCommunication.containsKey(id)) {
+                    String message= "Error : username and address are already used";
+                    System.out.println(message);
+                    byte[] emissionBuffer = message.getBytes();
+                    DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, clientAdr, clientPort);
+                    serverSocket.send(packetToSend);
                     continue;
                 }
 
-                InetAddress clientAdr = firstPacket.getAddress();
-                int clientPort = firstPacket.getPort();
-                DatagramSocket threadSocket = new DatagramSocket(serverAddress);
+                DatagramSocket threadSocket   = new DatagramSocket(null);
                 CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort);
 
-                InternalCommunication.put(incomingUsername, newThread);
+                ClientInformation newClient = new ClientInformation(incomingUsername, newThread);
+
+                InternalCommunication.put(id, newClient);
 
                 newThread.start();
             }

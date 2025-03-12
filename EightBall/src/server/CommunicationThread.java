@@ -8,25 +8,28 @@ import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
 public class CommunicationThread extends Thread {
-    private final Socket clientSocket;
+    private final InetAddress clientAdr;
+    private final int clientPort;
     private final DatagramSocket threadSocket;
     private final Timer timer;
     private byte[] receptionBuffer = new byte[1024];
     private byte[] emissionBuffer;
 
     public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort) throws IOException {
-        this.clientSocket = new Socket(clientAdr, clientPort);
+        this.clientAdr = clientAdr;
+        this.clientPort = clientPort;
         this.threadSocket = threadSocket;
         this.timer = new Timer(this, 600);
     }
 
     public void run() {
         timer.start();
-        while (timer.getTime() < 600) {
+        System.out.println("Connection thread running");
+        while (true) {
             try {
                 String question = "Ask your question ?";
                 this.emissionBuffer = question.getBytes();
-                DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, clientSocket.getInetAddress(), clientSocket.getPort());
+                DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, this.clientAdr, this.clientPort);
                 threadSocket.send(packetToSend);
                 DatagramPacket response = waitingResponse();
 
@@ -42,6 +45,7 @@ public class CommunicationThread extends Thread {
                 sendPacket(answer);
 
             } catch (IOException e) {
+                System.out.println("Connection thread stopped");
                 throw new RuntimeException(e);
             }
         }
@@ -49,8 +53,9 @@ public class CommunicationThread extends Thread {
 
     private void sendPacket(String message) {
         try {
+            System.out.println("Message to send : "+ message);
             this.emissionBuffer = message.getBytes();
-            DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, clientSocket.getInetAddress(), clientSocket.getPort());
+            DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, this.clientAdr, this.clientPort);
             threadSocket.send(packetToSend);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,6 +68,7 @@ public class CommunicationThread extends Thread {
             timer.reset();
             this.threadSocket.receive(incomingPacket);
             timer.reset();
+            System.out.println("Message received : "+ incomingPacket.getData());
             return incomingPacket;
         } catch (Exception e) {
             throw new RuntimeException(e);
