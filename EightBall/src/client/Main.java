@@ -27,13 +27,11 @@ public class Main {
                 Main.serverAddress = InetAddress.getByName(scanner.next());
                 System.out.println("Pick the server port : ");
                 Main.serverPort = scanner.nextInt();
-                clientSocket.connect(Main.serverAddress, Main.serverPort);
-                if (clientSocket.isConnected()) {
+                if (Main.serverAddress.isReachable(3000)) {
                     isValid = true;
                 } else {
                     throw new Exception();
                 }
-                clientSocket.disconnect();
             } catch (Exception e) {
                 System.out.println("We are not able to contact this server, please try again.");
             }
