@@ -16,6 +16,9 @@ public class Main {
     private static final String ANSI_CYAN  = "\u001B[36m";
     public  static final String ANSI_RESET = "\u001B[0m";
 
+    /**
+     * Ask for an address and a port and test it while server given isn't accessible.
+     */
     private static void chooseServer() {
         boolean isValid = false;
         while (!isValid) {
@@ -37,6 +40,11 @@ public class Main {
         }
     }
 
+    /**
+     * Send a message from a given String
+     * @param emissionMessage String, message to send
+     * @throws IOException
+     */
     private static void emission(String emissionMessage) throws IOException {
         Main.emissionBuffer = null;
         Main.emissionBuffer = emissionMessage.getBytes();
@@ -44,6 +52,11 @@ public class Main {
         Main.clientSocket.send(emissionPacket);
     }
 
+    /**
+     * Reception message from server.
+     * @return String message parsed in String.
+     * @throws Exception
+     */
     private static String reception() throws Exception {
         Main.receptionBuffer = new byte[1024];
         DatagramPacket receptionPacket = new DatagramPacket(Main.receptionBuffer, Main.receptionBuffer.length);
@@ -57,9 +70,13 @@ public class Main {
         return message;
     }
 
+    /**
+     * Get a answer to send to the server.
+     * @throws IOException
+     */
     private static void answer() throws IOException {
         System.out.println("Please pick the number of your answer:");
-        for (int i = 0; i< Answers.getSize(); i++){
+        for (int i = 0; i < Answers.getSize(); i++){
             System.out.println("[" + (i+1) + "] " + Answers.getAnswer(i));
         }
         int answer = 1;
@@ -95,7 +112,7 @@ public class Main {
         boolean validUsername = false;
 
         // Username choice :
-        do {
+        while (!validUsername) {
             try {
                 System.out.println("Pick your username for this session (\"abandon\" to quit):");
                 String username = scanner.nextLine();
@@ -114,7 +131,7 @@ public class Main {
                 Main.clientSocket.close();
                 return;
             }
-        } while (!validUsername);
+        } ;
 
         // Communication loop :
         System.out.println("Ask a question, or exit with \"exit\":");
