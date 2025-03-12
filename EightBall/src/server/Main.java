@@ -10,13 +10,17 @@ public class Main {
         try {
             InetSocketAddress serverAddress = new InetSocketAddress("localhost", 6666);
             serverSocket = new DatagramSocket(serverAddress);
+            System.out.println("Server adress: " + serverAddress.getAddress().getHostAddress());
+            System.out.println("Server port: " + serverAddress.getPort());
             byte[] receptionBuffer = new byte[1024];
 
             while (true) {
                 DatagramPacket firstPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
                 serverSocket.receive(firstPacket);
 
-                String incomingUsername = Arrays.toString(firstPacket.getData());
+                String incomingUsername = new String(firstPacket.getData());
+                incomingUsername = incomingUsername.trim();
+                System.out.println("Incoming message: " + incomingUsername);
 
                 if (InternalCommunication.containsKey(incomingUsername)) {
                     System.out.println("TODO Username already used : add like UserName_2 to DNS & send the new name to the client");

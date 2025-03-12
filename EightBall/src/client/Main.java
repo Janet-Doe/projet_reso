@@ -5,7 +5,8 @@ import java.util.Scanner;
 
 public class Main {
     private static DatagramSocket clientSocket;
-    private static DatagramSocket serverSocket;
+    private static InetAddress serverAddress;
+    private static int serverPort;
 
     private static void chooseServer(){
         Scanner scanner = new Scanner(System.in);
@@ -13,13 +14,13 @@ public class Main {
         do {
             try {
                 System.out.println("Pick the server address : ");
-                InetAddress serverAddress = InetAddress.getByName(scanner.next());
+                Main.serverAddress = InetAddress.getByName(scanner.next());
                 System.out.println("Pick the server port : ");
-                int serverPort = scanner.nextInt();
-                serverSocket = new DatagramSocket(new InetSocketAddress(serverAddress, serverPort));
+                Main.serverPort = scanner.nextInt();
                 isValid = true;
             } catch (Exception e) {
                 isValid = false;
+                System.out.println(e.getMessage());
                 System.out.println("We are not able to contact this server, please try again.");
             }
         } while (!isValid);
@@ -34,7 +35,7 @@ public class Main {
         System.out.println("I am a client !");
         // Set up :
         try {
-                    clientSocket = new DatagramSocket(null);
+                Main.clientSocket = new DatagramSocket(null);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
@@ -48,21 +49,24 @@ public class Main {
             try {
                 // Emission :
                 emissionBuffer = emissionMessage.getBytes();
-                DatagramPacket emissionPacket = new DatagramPacket(emissionBuffer, emissionBuffer.length, serverSocket.getInetAddress(), serverSocket.getPort());
-                clientSocket.send(emissionPacket);
+                DatagramPacket emissionPacket = new DatagramPacket(emissionBuffer, emissionBuffer.length, Main.serverAddress, Main.serverPort);
+                Main.clientSocket.send(emissionPacket);
                 // Reception :
                 DatagramPacket receptionPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
-                clientSocket.receive(receptionPacket);
+                Main.clientSocket.receive(receptionPacket);
                 String receptionMessage = new String(receptionPacket.getData(), 0, receptionPacket.getLength());
                 System.out.println("From the server: " + receptionMessage);
                 // Reaction :
                 emissionMessage = scanner.nextLine();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+                System.out.println("Exit.");
+                Main.clientSocket.close();
+                return;
             }
         }
         // End of communication :
         System.out.println("Bye-bye!");
-        clientSocket.close();
+        Main.clientSocket.close();
     }
 }
