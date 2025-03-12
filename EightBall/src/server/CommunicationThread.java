@@ -21,12 +21,12 @@ public class CommunicationThread extends Thread {
      */
     private final Timer timer;
 
-    public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort, int clientId) {
+    public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort, int clientId, int timeLimit) {
         this.clientAdr = clientAdr;
         this.clientPort = clientPort;
         this.clientId = clientId;
         this.threadSocket = threadSocket;
-        this.timer = new Timer(this, 600);
+        this.timer = new Timer(this, timeLimit);
         this.threadId = threadIdCounter++;
     }
 

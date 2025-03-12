@@ -43,7 +43,7 @@ public class Main {
                 DatagramSocket threadSocket   = new DatagramSocket(null);
                 System.out.println("newThread information : "+threadSocket.getInetAddress() +"   "+ threadSocket.getPort());
                 System.out.flush();
-                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id);
+                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id, 600);
 
                 ClientInformation newClient = new ClientInformation(incomingUsername, newThread);
 
