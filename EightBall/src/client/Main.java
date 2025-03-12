@@ -40,14 +40,18 @@ public class Main {
         Main.clientSocket.send(emissionPacket);
     }
 
-    private static String reception() throws IOException {
+    private static String reception() throws Exception {
         Main.receptionBuffer = new byte[1024];
         Scanner scanner = new Scanner(System.in);
         DatagramPacket receptionPacket = new DatagramPacket(Main.receptionBuffer, Main.receptionBuffer.length);
         Main.clientSocket.receive(receptionPacket);
+        String message = (new String(receptionPacket.getData())).trim();
+        if (message.equals("Connection lost")) {
+            throw new Exception("Connection lost");
+        }
         serverAddress = receptionPacket.getAddress();
         serverPort = receptionPacket.getPort();
-        return new String(receptionPacket.getData(), 0, receptionPacket.getLength());
+        return message;
     }
 
     private static void answer() throws IOException {
@@ -63,10 +67,10 @@ public class Main {
                 System.out.println("This is not a valid answer. Please try again:");
                 continue;
             }
-            answer = Integer.getInteger(answerString) - 1;
-            while (answer < 0 || answer >= Answers.getSize()) {
+            answer = Integer.parseInt(answerString) - 1;
+            if (answer < 0 || answer >= Answers.getSize()) {
                 System.out.println("This is not a valid answer. Please try again:");
-                answer = scanner.nextInt() - 1;
+                continue;
             }
             answerIsCorrect = true;
         }
@@ -112,7 +116,7 @@ public class Main {
         // Communication loop :
         System.out.println("Ask a question, or exit with \"exit\":");
         String emissionMessage = scanner.nextLine();
-        while (!emissionMessage.equals("exit") && !emissionMessage.equals("Connection lost")) {
+        while (!emissionMessage.equals("exit")) {
             try {
                 emission(emissionMessage); //sending question n°1
                 System.out.println("Please answer this question: " + Main.ANSI_CYAN + reception() + Main.ANSI_RESET); //receiving question n°2

@@ -116,7 +116,8 @@ public class CommunicationThread extends Thread {
             return incomingPacket;
         } catch (Exception e) {
             System.out.println("Thread n°"+this.threadId+" : waiting response failed");
-            throw new RuntimeException(e);
+            this.interrupt();
         }
+        return null;
     }
 }
