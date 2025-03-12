@@ -18,20 +18,20 @@ public class Main {
                 DatagramPacket firstPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
                 serverSocket.receive(firstPacket);
 
+                InetAddress clientAdr = firstPacket.getAddress();
+                int clientPort = firstPacket.getPort();
+
                 //When client want to connect
                 String incomingUsername = new String(firstPacket.getData());
                 receptionBuffer = new byte[1024];
                 incomingUsername = incomingUsername.split(":")[1].trim();
                 System.out.println("Incoming username: " + incomingUsername);
 
-                InetAddress clientAdr = firstPacket.getAddress();
-                int clientPort        = firstPacket.getPort();
-
                 int id = incomingUsername.hashCode() + clientAdr.hashCode();
 
                 //Check username and address
                 if (InternalCommunication.containsKey(id)) {
-                    String message= "Error : username and address are already used";
+                    String message = "Error : username and address are already used";
                     System.out.println(message);
                     byte[] emissionBuffer = message.getBytes();
                     DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, clientAdr, clientPort);
@@ -40,7 +40,7 @@ public class Main {
                 }
 
                 //Create a CommunicationThread for this client
-                DatagramSocket threadSocket   = new DatagramSocket(null);
+                DatagramSocket threadSocket = new DatagramSocket(null);
                 System.out.flush();
                 CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id, 300);
 
@@ -50,7 +50,7 @@ public class Main {
 
                 newThread.start();
             }
-        } catch (Exception e) {
+        } catch(Exception e){
             if (serverSocket != null) {
                 serverSocket.close();
             }
