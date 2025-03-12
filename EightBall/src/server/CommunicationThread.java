@@ -99,7 +99,7 @@ public class CommunicationThread extends Thread {
     }
 
     /**
-     * Wait a response from client and return it in a DatagramPacket.
+     * Wait for client answer and return it as DatagramPacket.
      * Reset timer before and after waiting
      * @return DatagramPacket, client message
      */

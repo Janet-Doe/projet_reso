@@ -17,7 +17,7 @@ public class Main {
     public  static final String ANSI_RESET = "\u001B[0m";
 
     /**
-     * Ask for an address and a port and test it while server given isn't accessible.
+     * Ask for an address and a port and test them, as long as the given server isn't accessible.
      */
     private static void chooseServer() {
         boolean isValid = false;
@@ -41,7 +41,7 @@ public class Main {
     /**
      * Send a message from a given String
      * @param emissionMessage String, message to send
-     * @throws IOException
+     * @throws IOException, exception from the DatagramSocket.send() method
      */
     private static void emission(String emissionMessage) throws IOException {
         Main.emissionBuffer = null;
@@ -53,7 +53,7 @@ public class Main {
     /**
      * Reception message from server.
      * @return String message parsed in String.
-     * @throws Exception
+     * @throws Exception, exception from the DatagramSocket.receive() method
      */
     private static String reception() throws Exception {
         Main.receptionBuffer = new byte[1024];
@@ -69,8 +69,8 @@ public class Main {
     }
 
     /**
-     * Get a answer to send to the server.
-     * @throws IOException
+     * Ask and send a valid answer to the server.
+     * @throws IOException, exception from the DatagramSocket.send() method
      */
     private static void answer() throws IOException {
         System.out.println("Please pick the number of your answer:");
@@ -101,6 +101,7 @@ public class Main {
         // Set up :
         try {
             Main.clientSocket = new DatagramSocket(null);
+            Main.clientSocket.setSoTimeout(300000); // set a timed-out at 5min of inactivity
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
