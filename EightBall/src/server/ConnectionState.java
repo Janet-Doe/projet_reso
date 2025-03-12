@@ -1,5 +1,8 @@
 package server;
 
+/**
+ * Connections states for futures implementations, not used yet
+ */
 public enum ConnectionState {
     WAITING(0),
     CONNECTED(0);

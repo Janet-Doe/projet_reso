@@ -3,6 +3,9 @@ package server;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Enumeration of possible questions and client questions list.
+ */
 public enum Questions {
     ROMANCE,
     MONEY,
