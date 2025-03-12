@@ -21,7 +21,7 @@ public class Timer extends Thread {
 
     public int getTime() {
         long currentTime = System.currentTimeMillis();
-        return (int) (currentTime - timeStart)*1000;
+        return (int) (currentTime - timeStart)/1000;
 
     }
 
@@ -38,7 +38,9 @@ public class Timer extends Thread {
         this.timeStart = System.currentTimeMillis();
         while (!stop) {
             if (getTime() > limit) {
+                System.out.println("thread interruption : "+thread.getName());
                 this.thread.interrupt();
+                this.close();
             }
         }
     }

@@ -33,6 +33,7 @@ public class Main {
     private static void answer(){}
 
     private static void emission(String emissionMessage) throws IOException {
+        Main.emissionBuffer = null;
         System.out.println("message : " + emissionMessage);
         Main.emissionBuffer = emissionMessage.getBytes();
         DatagramPacket emissionPacket = new DatagramPacket(Main.emissionBuffer, Main.emissionBuffer.length, Main.serverAddress, Main.serverPort);
@@ -40,8 +41,13 @@ public class Main {
     }
 
     private static String reception() throws IOException {
+        Main.receptionBuffer = new byte[1024];
+        Scanner scanner = new Scanner(System.in);
         DatagramPacket receptionPacket = new DatagramPacket(Main.receptionBuffer, Main.receptionBuffer.length);
         Main.clientSocket.receive(receptionPacket);
+        serverAddress = receptionPacket.getAddress();
+        System.out.println("Message coming from " + serverAddress.getHostAddress() + ":" + serverPort);
+        serverPort = receptionPacket.getPort();
         return new String(receptionPacket.getData(), 0, receptionPacket.getLength());
     }
 

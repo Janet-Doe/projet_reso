@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
 public class CommunicationThread extends Thread {
@@ -34,13 +35,13 @@ public class CommunicationThread extends Thread {
                 DatagramPacket response = waitingResponse();
 
                 question = InternalCommunication.getQuestion();
-                InternalCommunication.putQuestionInWaitingList(response.getData());
+                InternalCommunication.putQuestionInWaitingList((new String(response.getData())).trim());
 
                 sendPacket(question);
 
                 response = waitingResponse();
                 String answer = InternalCommunication.getAnswer();
-                InternalCommunication.putAnswerInWaitingList(response.getData());
+                InternalCommunication.putAnswerInWaitingList((new String(response.getData())).trim());
 
                 sendPacket(answer);
 
@@ -57,20 +58,26 @@ public class CommunicationThread extends Thread {
             this.emissionBuffer = message.getBytes();
             DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, this.clientAdr, this.clientPort);
             threadSocket.send(packetToSend);
+            this.emissionBuffer = null;
         } catch (IOException e) {
+            System.out.println("send packet failed");
             throw new RuntimeException(e);
         }
     }
 
     private DatagramPacket waitingResponse() {
         try {
+            this.receptionBuffer = new byte[1024];
             DatagramPacket incomingPacket = new DatagramPacket(this.receptionBuffer, receptionBuffer.length);
             timer.reset();
+            System.out.println("waiting...");
             this.threadSocket.receive(incomingPacket);
+            System.out.println("Message received : "+ Arrays.toString(incomingPacket.getData()));
             timer.reset();
-            System.out.println("Message received : "+ incomingPacket.getData());
+
             return incomingPacket;
         } catch (Exception e) {
+            System.out.println("waiting response failed");
             throw new RuntimeException(e);
         }
     }

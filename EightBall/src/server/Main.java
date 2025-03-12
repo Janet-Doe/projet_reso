@@ -19,6 +19,7 @@ public class Main {
                 serverSocket.receive(firstPacket);
 
                 String incomingUsername = new String(firstPacket.getData());
+                receptionBuffer = new byte[1024];
                 incomingUsername = incomingUsername.split(":")[1].trim();
                 System.out.println("Incoming username: " + incomingUsername);
 
@@ -37,6 +38,8 @@ public class Main {
                 }
 
                 DatagramSocket threadSocket   = new DatagramSocket(null);
+                System.out.println("newThread information : "+threadSocket.getInetAddress() +"   "+ threadSocket.getPort());
+                System.out.flush();
                 CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort);
 
                 ClientInformation newClient = new ClientInformation(incomingUsername, newThread);
