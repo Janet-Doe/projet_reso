@@ -61,4 +61,12 @@ public enum Answers {
         return VALUES.get(RANDOM.nextInt(SIZE));
     }
 
+    public static int getSize(){
+        return SIZE;
+    }
+
+    public static Answers getAnswer(int i){
+        return VALUES.get(i);
+    }
+
 }

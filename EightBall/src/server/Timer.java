@@ -1,7 +1,8 @@
 package server;
 
-import java.net.Socket;
-
+/**
+ * Timer which interrupt a Thread when limit is passed.
+ */
 public class Timer extends Thread {
 
     private long timeStart;

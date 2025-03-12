@@ -4,18 +4,21 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.Arrays;
-import java.util.concurrent.Semaphore;
 
+/**
+ * Thread which manage communication with one client.
+ */
 public class CommunicationThread extends Thread {
     private final InetAddress clientAdr;
     private final int clientPort;
     private final int clientId;
     private final DatagramSocket threadSocket;
-    private final Timer timer;
-    private byte[] receptionBuffer = new byte[1024];
     private byte[] emissionBuffer;
+    /**
+     * Timer to close this thread when time limit between client message is passed
+     */
+    private final Timer timer;
 
     public CommunicationThread(DatagramSocket threadSocket, InetAddress clientAdr, int clientPort, int clientId) {
         this.clientAdr = clientAdr;
@@ -25,12 +28,17 @@ public class CommunicationThread extends Thread {
         this.timer = new Timer(this, 60);
     }
 
+    /**
+     * Methode run when thread is start, with all software logical server side
+     */
     public void run() {
         timer.start();
         System.out.println("Connection thread running");
+
+        //While client is connected, do something
         while (!this.isInterrupted()) {
             try {
-                String question = "Ask your question ?";
+                String question = "Ask your question:";
                 this.emissionBuffer = question.getBytes();
                 DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, this.clientAdr, this.clientPort);
                 threadSocket.send(packetToSend);
@@ -53,11 +61,17 @@ public class CommunicationThread extends Thread {
             }
         }
 
+        //If the thread is interrupted, client is disconnected
+        //So we close this threadSocket and we remove client from DNS
         System.out.println("Connection thread stopped");
         this.threadSocket.close();
-        InternalCommunication.get(this.clientId).setState(ConnectionState.WAITING);
+        InternalCommunication.remove(this.clientId);
     }
 
+    /**
+     * Create a DatagramPacket to send message given in parameter.
+     * @param message String, message to send to client
+     */
     private void sendPacket(String message) {
         try {
             System.out.println("Message to send : "+ message);
@@ -71,14 +85,19 @@ public class CommunicationThread extends Thread {
         }
     }
 
+    /**
+     * Wait a response from client and return it in a DatagramPacket.
+     * Reset timer before and after waiting
+     * @return DatagramPacket, client message
+     */
     private DatagramPacket waitingResponse() {
         try {
-            this.receptionBuffer = new byte[1024];
-            DatagramPacket incomingPacket = new DatagramPacket(this.receptionBuffer, receptionBuffer.length);
+            byte[] receptionBuffer = new byte[1024];
+            DatagramPacket incomingPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
             timer.reset();
             System.out.println("waiting...");
             this.threadSocket.receive(incomingPacket);
-            System.out.println("Message received : "+ Arrays.toString(incomingPacket.getData()));
+            System.out.println("Message received : "+ (new String(incomingPacket.getData())).trim());
             timer.reset();
 
             return incomingPacket;
