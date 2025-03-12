@@ -42,7 +42,7 @@ public class Main {
                 //Create a CommunicationThread for this client
                 DatagramSocket threadSocket   = new DatagramSocket(null);
                 System.out.flush();
-                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id, 60);
+                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id, 300);
 
                 ClientInformation newClient = new ClientInformation(incomingUsername, newThread);
 

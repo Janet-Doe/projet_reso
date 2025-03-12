@@ -94,7 +94,7 @@ public class CommunicationThread extends Thread {
             this.emissionBuffer = null;
         } catch (IOException e) {
             System.out.println("Thread n°"+this.threadId+" : send packet failed");
-            throw new RuntimeException(e);
+            throw new RuntimeException("Thread closed");
         }
     }
 
@@ -116,8 +116,7 @@ public class CommunicationThread extends Thread {
             return incomingPacket;
         } catch (Exception e) {
             System.out.println("Thread n°"+this.threadId+" : waiting response failed");
-            this.interrupt();
+            throw new RuntimeException("Thread closed");
         }
-        return null;
     }
 }
