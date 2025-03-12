@@ -55,10 +55,20 @@ public class Main {
         for (int i = 0; i< Answers.getSize(); i++){
             System.out.println("[" + (i+1) + "] " + Answers.getAnswer(i));
         }
-        int answer = scanner.nextInt()-1;
-        while (answer < 0 || answer >= Answers.getSize()) {
-            System.out.println("This is not a valid answer. Please try again:");
-            answer = scanner.nextInt()-1;
+        int answer = 1;
+        boolean answerIsCorrect = false;
+        while (!answerIsCorrect) {
+            String answerString = scanner.next();
+            if (!isUnsignedInteger(answerString)) {
+                System.out.println("This is not a valid answer. Please try again:");
+                continue;
+            }
+            answer = Integer.getInteger(answerString) - 1;
+            while (answer < 0 || answer >= Answers.getSize()) {
+                System.out.println("This is not a valid answer. Please try again:");
+                answer = scanner.nextInt() - 1;
+            }
+            answerIsCorrect = true;
         }
         emission(Answers.getAnswer(answer).toString());
     }
@@ -102,7 +112,7 @@ public class Main {
         // Communication loop :
         System.out.println("Ask a question, or exit with \"exit\":");
         String emissionMessage = scanner.nextLine();
-        while (!emissionMessage.equals("exit")) {
+        while (!emissionMessage.equals("exit") && !emissionMessage.equals("Connection lost")) {
             try {
                 emission(emissionMessage); //sending question n°1
                 System.out.println("Please answer this question: " + Main.ANSI_CYAN + reception() + Main.ANSI_RESET); //receiving question n°2
@@ -123,5 +133,22 @@ public class Main {
         // End of communication :
         System.out.println("Bye-bye!");
         Main.clientSocket.close();
+    }
+
+    /**
+     * Check if String is an unsigned Integer.
+     * @param s String
+     * @return boolean, true if it is or false
+     */
+    public static boolean isUnsignedInteger(String s) {
+        int radix = 10;
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                return false;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
     }
 }

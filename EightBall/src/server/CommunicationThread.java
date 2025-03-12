@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.Arrays;
 
 /**
  * Thread which manage communication with one client.
  */
 public class CommunicationThread extends Thread {
+    private static int threadIdCounter = 0;
+    private final int threadId;
     private final InetAddress clientAdr;
     private final int clientPort;
     private final int clientId;
@@ -25,7 +26,25 @@ public class CommunicationThread extends Thread {
         this.clientPort = clientPort;
         this.clientId = clientId;
         this.threadSocket = threadSocket;
-        this.timer = new Timer(this, 60);
+        this.timer = new Timer(this, 600);
+        this.threadId = threadIdCounter++;
+    }
+
+    public int getThreadId() {
+        return threadId;
+    }
+
+    /**
+     * If the thread is interrupted, client is disconnected
+     * So we close this threadSocket and we remove client from DNS
+     */
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        System.out.println("Connection thread n°"+this.threadId+" stopped");
+        sendPacket("Connection lost");
+        this.threadSocket.close();
+        InternalCommunication.remove(this.clientId);
     }
 
     /**
@@ -33,9 +52,9 @@ public class CommunicationThread extends Thread {
      */
     public void run() {
         timer.start();
-        System.out.println("Connection thread running");
+        System.out.println("Connection thread n°"+this.threadId+" running");
 
-        //While client is connected, do something
+        //While client is connected, "do something"
         while (!this.isInterrupted()) {
             try {
                 String question = "Ask your question:";
@@ -56,16 +75,10 @@ public class CommunicationThread extends Thread {
                 sendPacket(answer);
 
             } catch (IOException e) {
-                System.err.println("Error thread");
+                System.err.println("Error thread n°"+this.threadId);
                 throw new RuntimeException(e);
             }
         }
-
-        //If the thread is interrupted, client is disconnected
-        //So we close this threadSocket and we remove client from DNS
-        System.out.println("Connection thread stopped");
-        this.threadSocket.close();
-        InternalCommunication.remove(this.clientId);
     }
 
     /**
@@ -74,13 +87,13 @@ public class CommunicationThread extends Thread {
      */
     private void sendPacket(String message) {
         try {
-            System.out.println("Message to send : "+ message);
+            System.out.println("Thread n°"+this.threadId+" : Message to send : "+ message);
             this.emissionBuffer = message.getBytes();
             DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, this.clientAdr, this.clientPort);
             threadSocket.send(packetToSend);
             this.emissionBuffer = null;
         } catch (IOException e) {
-            System.out.println("send packet failed");
+            System.out.println("Thread n°"+this.threadId+" : send packet failed");
             throw new RuntimeException(e);
         }
     }
@@ -95,14 +108,14 @@ public class CommunicationThread extends Thread {
             byte[] receptionBuffer = new byte[1024];
             DatagramPacket incomingPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
             timer.reset();
-            System.out.println("waiting...");
+            System.out.println("Thread n°"+this.threadId+" : waiting...");
             this.threadSocket.receive(incomingPacket);
             System.out.println("Message received : "+ (new String(incomingPacket.getData())).trim());
             timer.reset();
 
             return incomingPacket;
         } catch (Exception e) {
-            System.out.println("waiting response failed");
+            System.out.println("Thread n°"+this.threadId+" : waiting response failed");
             throw new RuntimeException(e);
         }
     }
