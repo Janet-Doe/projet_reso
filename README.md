@@ -11,7 +11,6 @@ The client-server system we use gives the users the ability to anonymously ask q
 and to answer those of others through the typical 8-Ball answers, in a cross-exchange between strangers.
 
 ## How to make it work?
-
 Don't worry, it's quite easy.
 
 First step: clone this repository with your friends.  
@@ -23,7 +22,7 @@ open server, answering each others' questions anonymously (or as anonymous as it
 are connected on the server).
 
 ## Documentation
-The Javadoc of the code 
+The code is documented thoroughly, with the Javadoc generated. Furthermore, some functions have been broken down with small comments for developper clarification.
 
 ## Conception
 
