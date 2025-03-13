@@ -1,42 +1,60 @@
 package server;
 
 import java.net.*;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) {
         DatagramSocket serverSocket = null;
         try {
+            // Creating serverSocket waiting for client interaction
             InetSocketAddress serverAddress = new InetSocketAddress("localhost", 6666);
             serverSocket = new DatagramSocket(serverAddress);
+            System.out.println("Server address: " + serverAddress.getAddress().getHostAddress());
+            System.out.println("Server port: " + serverAddress.getPort());
             byte[] receptionBuffer = new byte[1024];
 
             while (true) {
                 DatagramPacket firstPacket = new DatagramPacket(receptionBuffer, receptionBuffer.length);
                 serverSocket.receive(firstPacket);
 
-                String incomingUsername = Arrays.toString(firstPacket.getData());
+                InetAddress clientAdr = firstPacket.getAddress();
+                int clientPort = firstPacket.getPort();
 
-                if (InternalCommunication.containsKey(incomingUsername)) {
-                    System.out.println("TODO Username already used : add like UserName_2 to DNS & send the new name to the client");
+                // Client asks to connect
+                String incomingUsername = new String(firstPacket.getData());
+                receptionBuffer = new byte[1024];
+                incomingUsername = incomingUsername.split(":")[1].trim();
+                System.out.println("Incoming username: " + incomingUsername);
+
+                int id = incomingUsername.hashCode() + clientAdr.hashCode();
+
+                // Check username and address
+                if (InternalCommunication.containsKey(id)) {
+                    String message = "Error : username and address are already used";
+                    System.out.println(message);
+                    byte[] emissionBuffer = message.getBytes();
+                    DatagramPacket packetToSend = new DatagramPacket(emissionBuffer, emissionBuffer.length, clientAdr, clientPort);
+                    serverSocket.send(packetToSend);
                     continue;
                 }
 
-                InetAddress clientAdr = firstPacket.getAddress();
-                int clientPort = firstPacket.getPort();
-                DatagramSocket threadSocket = new DatagramSocket(serverAddress);
-                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort);
+                // Create a CommunicationThread for this client
+                DatagramSocket threadSocket = new DatagramSocket(null);
+                System.out.flush();
+                CommunicationThread newThread = new CommunicationThread(threadSocket, clientAdr, clientPort, id, 300);
 
-                InternalCommunication.put(incomingUsername, newThread);
+                ClientInformation newClient = new ClientInformation(incomingUsername, newThread);
+
+                InternalCommunication.put(id, newClient);
 
                 newThread.start();
             }
-        } catch (Exception e) {
+        } catch(Exception e){
             if (serverSocket != null) {
                 serverSocket.close();
             }
-            System.err.println(e);
+            System.err.println(e.getMessage());
         }
     }
 }

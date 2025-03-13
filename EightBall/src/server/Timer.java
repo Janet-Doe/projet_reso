@@ -1,12 +1,13 @@
 package server;
 
-import java.net.Socket;
-
+/**
+ * Timer which interrupt a Thread when limit is passed.
+ */
 public class Timer extends Thread {
 
     private long timeStart;
     private boolean stop = false;
-    private final Thread thread;
+    private final CommunicationThread thread;
     private final int limit;
 
     /**
@@ -14,14 +15,14 @@ public class Timer extends Thread {
      * @param thread Thread
      * @param limit int, time in seconds
      */
-    public Timer(Thread thread, int limit) {
+    public Timer(CommunicationThread thread, int limit) {
         this.thread = thread;
         this.limit = limit;
     }
 
     public int getTime() {
         long currentTime = System.currentTimeMillis();
-        return (int) (currentTime - timeStart)*1000;
+        return (int) (currentTime - timeStart)/1000;
 
     }
 
@@ -38,7 +39,9 @@ public class Timer extends Thread {
         this.timeStart = System.currentTimeMillis();
         while (!stop) {
             if (getTime() > limit) {
+                System.out.println("thread interruption : "+thread.getThreadId());
                 this.thread.interrupt();
+                this.close();
             }
         }
     }

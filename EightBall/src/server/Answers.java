@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Enumeration of possible answers.
+ * Enumeration of the typical 8-Ball answers.
  */
 public enum Answers {
     AS_I_SEE_IT_YES,
@@ -59,6 +59,14 @@ public enum Answers {
 
     public static Answers getRandom(){
         return VALUES.get(RANDOM.nextInt(SIZE));
+    }
+
+    public static int getSize(){
+        return SIZE;
+    }
+
+    public static Answers getAnswer(int i){
+        return VALUES.get(i);
     }
 
 }

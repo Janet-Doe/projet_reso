@@ -3,6 +3,9 @@ package server;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Enumeration of possible default questions, and client questions list.
+ */
 public enum Questions {
     ROMANCE,
     MONEY,
@@ -28,7 +31,8 @@ public enum Questions {
             case BREAKUP -> "Should I dump my partner?";
             case FRIEND -> "Should I invite my friend to hangout?";
             case EX -> "Should I call my ex?";
-            default -> "Will I be happy?";
+            case FUTURE -> "Will I be happy?";
+            default -> "Is this game really working?";
         };
     }
 
