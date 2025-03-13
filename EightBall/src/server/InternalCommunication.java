@@ -35,7 +35,7 @@ public class InternalCommunication {
     }
 
     public static String getQuestion() {
-        if (questionQueue.size() <= 1) {
+        if (questionQueue.isEmpty()) {
             return Questions.getRandom().toString();
         } else {
             return questionQueue.poll();
@@ -43,7 +43,7 @@ public class InternalCommunication {
     }
 
     public static String getAnswer() {
-        if (answerQueue.size() <= 1) {
+        if (answerQueue.isEmpty()) {
             return Answers.getRandom().toString();
         } else {
             return answerQueue.poll();
